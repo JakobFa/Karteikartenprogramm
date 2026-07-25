@@ -23,7 +23,14 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <Cat name="cheer" className="cat cat-lg cat-wiggle" />
+        <button
+          className="home-cat-btn"
+          onClick={() => setView({ name: 'overview' })}
+          aria-label="Zurück zum Hauptmenü"
+          title="Zurück zum Hauptmenü"
+        >
+          <Cat name="cheer" className="cat cat-lg cat-wiggle" />
+        </button>
         <h1 className="app-title">Karteikatzen</h1>
       </header>
 

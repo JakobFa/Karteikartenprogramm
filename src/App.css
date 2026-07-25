@@ -43,6 +43,23 @@ main {
   transform: rotate(6deg);
 }
 
+.home-cat-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  line-height: 0;
+  transition: transform 0.15s ease;
+}
+
+.home-cat-btn:hover {
+  transform: scale(1.08) rotate(-4deg);
+}
+
+.home-cat-btn:active {
+  transform: scale(0.95) rotate(-4deg);
+}
+
 /* ---------------- Klausur-Reife ---------------- */
 
 .exam-progress {
