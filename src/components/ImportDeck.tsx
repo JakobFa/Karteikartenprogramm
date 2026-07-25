@@ -61,9 +61,17 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
       <h2 className="panel-title">
         Karten futtern <span className="starburst">CSV rein!</span>
       </h2>
-      <p className="hint">
-        Format: pro Zeile <code>Frage,Antwort</code> (Kopfzeile ist okay).
-      </p>
+      <ul className="hint csv-rules">
+        <li>
+          Genau <strong>2 Spalten</strong> pro Zeile: <code>Frage,Antwort</code>
+        </li>
+        <li>Kopfzeile optional (z. B. „Frage,Antwort“ oder „Front,Back“) — wird erkannt</li>
+        <li>
+          Kommt ein Komma im Text vor? Dann Feld in Anführungszeichen setzen:{' '}
+          <code>"Paris, Frankreich",Hauptstadt</code>
+        </li>
+        <li>Datei-Kodierung: UTF-8 (Standard bei Excel/Numbers/Sheets-Export)</li>
+      </ul>
 
       <div className="import-form">
         <input
