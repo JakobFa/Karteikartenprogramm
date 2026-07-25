@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { db, type Card } from '../db';
-import { schedule, type Grade } from '../scheduler';
+import { byWeakness, reinsertAfterAgain, schedule, type Grade } from '../scheduler';
 import { Cat, PHRASES, pick, type CatName } from '../cats';
 
 interface StudySessionProps {
@@ -42,7 +42,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
         .equals(deckId)
         .filter((c) => c.dueDate <= now)
         .toArray();
-      if (!cancelled) setQueue(dueCards);
+      if (!cancelled) setQueue(byWeakness(dueCards));
     })();
     return () => {
       cancelled = true;
@@ -97,9 +97,9 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     setQueue((prev) => {
       if (!prev) return prev;
       const rest = prev.slice(1);
-      // "Nochmal" kommt in derselben Session wieder dran.
+      // "Nochmal" kommt schon nach ein paar Karten wieder dran, nicht erst am Sessionende.
       if (grade === 'again') {
-        return [...rest, { ...current, ...result }];
+        return reinsertAfterAgain(rest, { ...current, ...result });
       }
       return rest;
     });

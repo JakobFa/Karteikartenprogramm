@@ -46,3 +46,26 @@ export function schedule(card: Card, grade: Grade, now: number = Date.now()): Sc
 
   return { easeFactor, interval, repetitions, dueDate };
 }
+
+/**
+ * Sortiert eine Session-Warteschlange so, dass schlecht sitzende Karten
+ * (niedriger Ease-Faktor = oft mit Nochmal/Schwer bewertet) zuerst drankommen,
+ * statt stur in Import-Reihenfolge abgefragt zu werden.
+ */
+export function byWeakness(cards: Card[]): Card[] {
+  return [...cards].sort((a, b) => {
+    if (a.easeFactor !== b.easeFactor) return a.easeFactor - b.easeFactor;
+    if (a.repetitions !== b.repetitions) return a.repetitions - b.repetitions;
+    return a.id - b.id;
+  });
+}
+
+/**
+ * Fuegt eine mit "Nochmal" bewertete Karte nicht ganz ans Ende der
+ * Session-Warteschlange, sondern schon nach wenigen Karten wieder ein —
+ * so bleibt sie im Kurzzeitgedaechtnis, statt erst am Sessionende zurueckzukommen.
+ */
+export function reinsertAfterAgain(rest: Card[], card: Card): Card[] {
+  const insertAt = Math.min(3, rest.length);
+  return [...rest.slice(0, insertAt), card, ...rest.slice(insertAt)];
+}
