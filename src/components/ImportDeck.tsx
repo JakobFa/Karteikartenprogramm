@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { db, newCardDefaults } from '../db';
 import { parseCsv } from '../csv';
+import { Cat, PHRASES, pick } from '../cats';
 
 interface ImportDeckProps {
   onImported: () => void;
@@ -11,11 +12,12 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [phrase] = useState(() => pick(PHRASES.import));
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleImport() {
     if (!file) {
-      setErrors(['Bitte zuerst eine CSV-Datei auswählen.']);
+      setErrors(['Miau! Erst eine CSV-Datei aussuchen.']);
       return;
     }
     const name = deckName.trim() || file.name.replace(/\.csv$/i, '');
@@ -27,7 +29,7 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
       const { cards, errors: parseErrors } = parseCsv(text);
 
       if (cards.length === 0) {
-        setErrors([...parseErrors, 'Keine gültigen Karten in der Datei gefunden.']);
+        setErrors([...parseErrors, 'Keine gueltigen Karten gefunden. Ich hab ueberall geschnueffelt!']);
         setBusy(false);
         return;
       }
@@ -55,28 +57,37 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
   }
 
   return (
-    <div className="import-deck">
-      <h2>Neues Deck aus CSV importieren</h2>
+    <section className="panel import-deck">
+      <h2 className="panel-title">
+        Karten futtern <span className="starburst">CSV rein!</span>
+      </h2>
       <p className="hint">
-        Format: pro Zeile <code>Frage,Antwort</code> (optional mit Kopfzeile).
+        Format: pro Zeile <code>Frage,Antwort</code> (Kopfzeile ist okay).
       </p>
+
       <div className="import-form">
         <input
           type="text"
-          placeholder="Deck-Name (optional, sonst Dateiname)"
+          placeholder="Deck-Name (optional)"
           value={deckName}
           onChange={(e) => setDeckName(e.target.value)}
         />
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv,text/csv"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-        <button onClick={handleImport} disabled={busy || !file}>
-          {busy ? 'Importiere…' : 'Importieren'}
+        <label className="file-button cbtn cbtn-cyan">
+          Datei waehlen
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+        <button className="cbtn cbtn-primary" onClick={handleImport} disabled={busy || !file}>
+          {busy ? 'Schnurrt…' : 'Los geht’s!'}
         </button>
       </div>
+
+      {file && <p className="file-name">🐾 {file.name}</p>}
+
       {errors.length > 0 && (
         <ul className="errors">
           {errors.map((e, i) => (
@@ -84,6 +95,11 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
           ))}
         </ul>
       )}
-    </div>
+
+      <div className="cat-row">
+        <Cat name="wink" className="cat cat-sm" />
+        <p className="speech">{phrase}</p>
+      </div>
+    </section>
   );
 }

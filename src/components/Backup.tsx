@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import { exportBackup, importBackup } from '../backup';
+import { Cat, PHRASES, pick } from '../cats';
 
 export function Backup() {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [phrase] = useState(() => pick(PHRASES.backup));
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleExport() {
@@ -21,9 +23,9 @@ export function Backup() {
     setStatus(null);
     try {
       const { decks, cards } = await importBackup(file);
-      setStatus(`${decks} Deck(s) mit ${cards} Karte(n) wiederhergestellt.`);
+      setStatus(`🐾 ${decks} Deck(s) mit ${cards} Karte(n) zurueckgeholt!`);
     } catch (err) {
-      setStatus(`Fehler: ${(err as Error).message}`);
+      setStatus(`Autsch: ${(err as Error).message}`);
     } finally {
       setBusy(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -31,18 +33,20 @@ export function Backup() {
   }
 
   return (
-    <div className="backup">
-      <h2>Backup</h2>
+    <section className="panel backup">
+      <h2 className="panel-title">
+        Backup <span className="starburst">nicht vergessen!</span>
+      </h2>
       <p className="hint">
-        Deine Daten liegen nur in diesem Browser. Lade regelmäßig ein Backup herunter, um sie
-        zu sichern oder auf ein anderes Gerät zu übertragen.
+        Deine Karten leben nur in diesem Browser. Lad dir ab und zu ein Backup runter — oder
+        nimm es mit auf ein anderes Geraet.
       </p>
       <div className="backup-actions">
-        <button onClick={handleExport} disabled={busy}>
-          Backup herunterladen
+        <button className="cbtn cbtn-cyan" onClick={handleExport} disabled={busy}>
+          Backup runterladen
         </button>
-        <label className="file-button">
-          Backup importieren
+        <label className="file-button cbtn cbtn-pink">
+          Backup einspielen
           <input
             ref={fileInputRef}
             type="file"
@@ -56,6 +60,10 @@ export function Backup() {
         </label>
       </div>
       {status && <p className="backup-status">{status}</p>}
-    </div>
+      <div className="cat-row">
+        <Cat name="think" className="cat cat-sm" />
+        <p className="speech">{phrase}</p>
+      </div>
+    </section>
   );
 }

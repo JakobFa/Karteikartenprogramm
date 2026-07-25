@@ -1,9 +1,22 @@
-# Karteikarten
+# Karteikatzen
 
 Web-App zum Lernen von Karteikarten mit Spaced Repetition (SM-2-Algorithmus,
-wie bei Anki). Karten werden per CSV importiert, alle Daten (Karten +
-Lernfortschritt) werden ausschließlich lokal im Browser gespeichert
-(IndexedDB) — es gibt keinen Server und keine Datenbank im Hintergrund.
+wie bei Anki) — im Comic-Look, mit Katzen, die einem beim Lernen Mut zusprechen.
+Karten werden per CSV importiert, alle Daten (Karten + Lernfortschritt) werden
+ausschließlich lokal im Browser gespeichert (IndexedDB) — es gibt keinen Server
+und keine Datenbank im Hintergrund.
+
+**Live:** https://jakobfa.github.io/Karteikartenprogramm/
+
+## Features
+
+- CSV-Import von Karten (Frage/Antwort)
+- SM-2 Spaced Repetition: Bewertung *Nochmal / Schwer / Gut / Leicht* steuert,
+  wann eine Karte wieder drankommt
+- **Klausur-Reife**: Fortschrittsbalken pro Deck und über alle Decks, berechnet
+  aus den SM-2-Intervallen (ab ~21 Tagen Intervall gilt eine Karte als sicher)
+- Comic-Katzen als Inline-SVG mit kontextabhängigen Mutmach-Sprüchen
+- Backup-Export/-Import als JSON
 
 ## Entwicklung
 

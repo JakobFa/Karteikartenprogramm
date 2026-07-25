@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from './db';
+import { Cat, PHRASES, pick } from './cats';
 import { ImportDeck } from './components/ImportDeck';
 import { DeckList } from './components/DeckList';
 import { StudySession } from './components/StudySession';
 import { Backup } from './components/Backup';
+import { ExamProgress } from './components/ExamProgress';
 import './App.css';
 
 type View = { name: 'overview' } | { name: 'study'; deckId: number };
 
 function App() {
   const [view, setView] = useState<View>({ name: 'overview' });
+  const [greeting] = useState(() => pick(PHRASES.welcome));
 
   const studyingDeck = useLiveQuery(
     () => (view.name === 'study' ? db.decks.get(view.deckId) : undefined),
@@ -20,11 +23,20 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>Karteikarten</h1>
+        <Cat name="cheer" className="cat cat-lg cat-wiggle" />
+        <h1 className="app-title">Karteikatzen</h1>
       </header>
 
       {view.name === 'overview' && (
         <main>
+          <section className="panel">
+            <div className="cat-row" style={{ marginTop: 0 }}>
+              <Cat name="support" className="cat cat-md" />
+              <p className="speech">{greeting}</p>
+            </div>
+          </section>
+
+          <ExamProgress />
           <ImportDeck onImported={() => setView({ name: 'overview' })} />
           <DeckList onStudy={(deckId) => setView({ name: 'study', deckId })} />
           <Backup />
