@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { deckReadiness, type Readiness } from '../readiness';
-import { Cat, catForIndex, PHRASES, pick } from '../cats';
+import { Cat, catForIndex, pick } from '../cats';
+import { useLanguage } from '../LanguageContext';
 import { ReadinessBar } from './ReadinessBar';
 
 interface DeckListProps {
@@ -15,9 +16,16 @@ interface DeckStats {
 }
 
 export function DeckList({ onStudy }: DeckListProps) {
-  // Einmal gewuerfelt und dann stabil, sonst wechselt der Spruch bei jedem Render.
-  const [emptyPhrase] = useState(() => pick(PHRASES.emptyDecks));
-  const [readyPhrase] = useState(() => pick(PHRASES.deckReady));
+  const { t, lang, phrases } = useLanguage();
+  // Einmal gewuerfelt und dann stabil, sonst wechselt der Spruch bei jedem Render;
+  // bei Sprachwechsel aber neu wuerfeln, damit der Text zur Sprache passt.
+  const [emptyPhrase, setEmptyPhrase] = useState(() => pick(phrases.emptyDecks));
+  const [readyPhrase, setReadyPhrase] = useState(() => pick(phrases.deckReady));
+  useEffect(() => {
+    setEmptyPhrase(pick(phrases.emptyDecks));
+    setReadyPhrase(pick(phrases.deckReady));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
   const decks = useLiveQuery(() => db.decks.orderBy('createdAt').reverse().toArray(), []);
 
   const stats = useLiveQuery(async () => {
@@ -35,7 +43,7 @@ export function DeckList({ onStudy }: DeckListProps) {
   }, []);
 
   async function handleDelete(deckId: number, name: string) {
-    if (!confirm(`Deck "${name}" und alle Karten wirklich loeschen?`)) return;
+    if (!confirm(t.deckList.deleteConfirm(name))) return;
     await db.transaction('rw', db.decks, db.cards, async () => {
       await db.cards.where('deckId').equals(deckId).delete();
       await db.decks.delete(deckId);
@@ -45,7 +53,7 @@ export function DeckList({ onStudy }: DeckListProps) {
   if (!decks) {
     return (
       <section className="panel deck-list">
-        <p>Katze sucht deine Decks…</p>
+        <p>{t.deckList.loading}</p>
       </section>
     );
   }
@@ -53,7 +61,7 @@ export function DeckList({ onStudy }: DeckListProps) {
   if (decks.length === 0) {
     return (
       <section className="panel deck-list">
-        <h2 className="panel-title">Deine Decks</h2>
+        <h2 className="panel-title">{t.deckList.title}</h2>
         <div className="empty-state">
           <Cat name="sleepy" className="cat cat-md" />
           <p className="speech">{emptyPhrase}</p>
@@ -65,7 +73,10 @@ export function DeckList({ onStudy }: DeckListProps) {
   return (
     <section className="panel deck-list">
       <h2 className="panel-title">
-        Deine Decks <span className="starburst">{decks.length} Stueck</span>
+        {t.deckList.title}{' '}
+        <span className="starburst">
+          {decks.length} {t.deckList.countSuffix}
+        </span>
       </h2>
       <ul>
         {decks.map((deck, index) => {
@@ -78,11 +89,13 @@ export function DeckList({ onStudy }: DeckListProps) {
                 <div className="deck-stats">
                   {stat ? (
                     <>
-                      <span className="deck-due-badge">{stat.due} faellig</span>{' '}
-                      von {stat.readiness.total}
+                      <span className="deck-due-badge">
+                        {stat.due} {t.deckList.dueBadgeSuffix}
+                      </span>{' '}
+                      {t.deckList.ofPrefix} {stat.readiness.total}
                     </>
                   ) : (
-                    'zaehle…'
+                    t.deckList.counting
                   )}
                 </div>
                 {stat && <ReadinessBar readiness={stat.readiness} compact />}
@@ -93,10 +106,10 @@ export function DeckList({ onStudy }: DeckListProps) {
                   onClick={() => onStudy(deck.id)}
                   disabled={!stat || stat.due === 0}
                 >
-                  {stat && stat.due === 0 ? 'Alles sitzt!' : 'Lernen'}
+                  {stat && stat.due === 0 ? t.deckList.allDoneBtn : t.deckList.studyBtn}
                 </button>
                 <button className="cbtn cbtn-red" onClick={() => handleDelete(deck.id, deck.name)}>
-                  Weg damit
+                  {t.deckList.deleteBtn}
                 </button>
               </div>
             </li>

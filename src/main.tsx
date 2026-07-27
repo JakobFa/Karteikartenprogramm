@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { LanguageProvider } from './LanguageContext.tsx'
 
 // Ask the browser to treat our storage as persistent so IndexedDB survives
 // long gaps between visits (relevant for spaced repetition) instead of being
@@ -12,6 +13,8 @@ if (navigator.storage?.persist) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </StrictMode>,
 )

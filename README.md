@@ -17,6 +17,7 @@ und keine Datenbank im Hintergrund.
   aus den SM-2-Intervallen (ab ~21 Tagen Intervall gilt eine Karte als sicher)
 - Comic-Katzen als Inline-SVG mit kontextabhängigen Mutmach-Sprüchen
 - Backup-Export/-Import als JSON
+- Mehrsprachige Oberfläche: Deutsch, English, Español, Português (Umschalter im Hauptmenü)
 
 ## Entwicklung
 

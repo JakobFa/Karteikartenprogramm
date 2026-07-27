@@ -27,11 +27,11 @@ export async function importBackup(file: File): Promise<{ decks: number; cards: 
   try {
     parsed = JSON.parse(text);
   } catch {
-    throw new Error('Datei ist kein gültiges JSON.');
+    throw new Error('INVALID_JSON');
   }
 
   if (!parsed || !Array.isArray(parsed.decks) || !Array.isArray(parsed.cards)) {
-    throw new Error('Datei hat kein gültiges Backup-Format.');
+    throw new Error('INVALID_FORMAT');
   }
 
   let deckCount = 0;

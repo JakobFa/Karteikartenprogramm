@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { db, type Card } from '../db';
 import { byWeakness, reinsertAfterAgain, schedule, type Grade } from '../scheduler';
-import { Cat, PHRASES, pick, type CatName } from '../cats';
+import { Cat, pick, type CatName } from '../cats';
+import { useLanguage } from '../LanguageContext';
 
 interface StudySessionProps {
   deckId: number;
@@ -9,12 +10,12 @@ interface StudySessionProps {
   onFinish: () => void;
 }
 
-/** Katze + Comic-Lautwort passend zur Bewertung. */
-const GRADE_REACTION: Record<Grade, { cat: CatName; sfx: string }> = {
-  again: { cat: 'support', sfx: 'HOPPLA!' },
-  hard: { cat: 'think', sfx: 'PUH!' },
-  good: { cat: 'cheer', sfx: 'MIAU!' },
-  easy: { cat: 'love', sfx: 'WOW!' },
+/** Katze passend zur Bewertung. */
+const GRADE_CAT: Record<Grade, CatName> = {
+  again: 'support',
+  hard: 'think',
+  good: 'cheer',
+  easy: 'love',
 };
 
 interface CatState {
@@ -23,15 +24,21 @@ interface CatState {
 }
 
 export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) {
+  const { t, lang, phrases } = useLanguage();
   const [queue, setQueue] = useState<Card[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [reviewedCount, setReviewedCount] = useState(0);
   const [catState, setCatState] = useState<CatState>(() => ({
     cat: 'think',
-    text: pick(PHRASES.front),
+    text: pick(phrases.front),
   }));
   const [sfx, setSfx] = useState<{ text: string; key: number } | null>(null);
-  const [donePhrase] = useState(() => pick(PHRASES.done));
+  const [donePhrase, setDonePhrase] = useState(() => pick(phrases.done));
+  useEffect(() => {
+    setDonePhrase(pick(phrases.done));
+    setCatState({ cat: 'think', text: pick(phrases.front) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,7 +59,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
   if (queue === null) {
     return (
       <section className="panel study-session">
-        <p>Katze holt die Karten…</p>
+        <p>{t.study.loading}</p>
       </section>
     );
   }
@@ -61,14 +68,12 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     return (
       <section className="panel study-session done">
         <div className="done-inner">
-          <h2 className="done-title">Geschafft!</h2>
+          <h2 className="done-title">{t.study.doneTitle}</h2>
           <Cat name="sleepy" className="cat cat-lg cat-wiggle" />
           <p className="speech">{donePhrase}</p>
-          <p>
-            Du hast <strong>{reviewedCount}</strong> Karte(n) aus „{deckName}“ gelernt.
-          </p>
+          <p>{t.study.doneSummary(reviewedCount, deckName)}</p>
           <button className="cbtn cbtn-primary" onClick={onFinish}>
-            Zurueck zur Uebersicht
+            {t.study.backToOverview}
           </button>
         </div>
       </section>
@@ -81,7 +86,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     const next = !flipped;
     setFlipped(next);
     if (next) {
-      setCatState({ cat: 'wink', text: pick(PHRASES.back) });
+      setCatState({ cat: 'wink', text: pick(phrases.back) });
     }
   }
 
@@ -90,9 +95,8 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     await db.cards.update(current.id, result);
     setReviewedCount((n) => n + 1);
 
-    const reaction = GRADE_REACTION[grade];
-    setCatState({ cat: reaction.cat, text: pick(PHRASES[grade]) });
-    setSfx({ text: reaction.sfx, key: Date.now() });
+    setCatState({ cat: GRADE_CAT[grade], text: pick(phrases[grade]) });
+    setSfx({ text: t.study.sfx[grade], key: Date.now() });
 
     setQueue((prev) => {
       if (!prev) return prev;
@@ -110,7 +114,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     <section className="panel study-session">
       <div className="study-header">
         <span className="study-deck-name">{deckName}</span>
-        <span className="study-remaining">noch {queue.length}</span>
+        <span className="study-remaining">{t.study.remaining(queue.length)}</span>
       </div>
 
       <div className={`flashcard ${flipped ? 'flipped' : ''}`} onClick={handleFlip}>
@@ -120,22 +124,22 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
           </span>
         )}
         <div className="flashcard-content">{flipped ? current.back : current.front}</div>
-        {!flipped && <p className="flip-hint">👆 Klick mich um</p>}
+        {!flipped && <p className="flip-hint">{t.study.flipHint}</p>}
       </div>
 
       {flipped && (
         <div className="grade-buttons">
           <button className="cbtn grade-again" onClick={() => handleGrade('again')}>
-            Nochmal
+            {t.study.gradeAgain}
           </button>
           <button className="cbtn grade-hard" onClick={() => handleGrade('hard')}>
-            Schwer
+            {t.study.gradeHard}
           </button>
           <button className="cbtn grade-good" onClick={() => handleGrade('good')}>
-            Gut
+            {t.study.gradeGood}
           </button>
           <button className="cbtn grade-easy" onClick={() => handleGrade('easy')}>
-            Leicht
+            {t.study.gradeEasy}
           </button>
         </div>
       )}

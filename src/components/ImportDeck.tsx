@@ -1,23 +1,29 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { db, newCardDefaults } from '../db';
 import { parseCsv } from '../csv';
-import { Cat, PHRASES, pick } from '../cats';
+import { Cat, pick } from '../cats';
+import { useLanguage } from '../LanguageContext';
 
 interface ImportDeckProps {
   onImported: () => void;
 }
 
 export function ImportDeck({ onImported }: ImportDeckProps) {
+  const { t, lang, phrases } = useLanguage();
   const [deckName, setDeckName] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [phrase] = useState(() => pick(PHRASES.import));
+  const [phrase, setPhrase] = useState(() => pick(phrases.import));
+  useEffect(() => {
+    setPhrase(pick(phrases.import));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleImport() {
     if (!file) {
-      setErrors(['Miau! Erst eine CSV-Datei aussuchen.']);
+      setErrors([t.import.noFileError]);
       return;
     }
     const name = deckName.trim() || file.name.replace(/\.csv$/i, '');
@@ -26,10 +32,15 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
     setErrors([]);
     try {
       const text = await file.text();
-      const { cards, errors: parseErrors } = parseCsv(text);
+      const { cards, skippedRows, parseErrors } = parseCsv(text);
+
+      const messages = [
+        ...skippedRows.map((row) => t.import.skippedRowMsg(row)),
+        ...parseErrors.map((e) => t.import.parseErrorMsg(e.row ?? 0, e.message)),
+      ];
 
       if (cards.length === 0) {
-        setErrors([...parseErrors, 'Keine gueltigen Karten gefunden. Ich hab ueberall geschnueffelt!']);
+        setErrors([...messages, t.import.noCardsError]);
         setBusy(false);
         return;
       }
@@ -44,13 +55,13 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
         })),
       );
 
-      setErrors(parseErrors);
+      setErrors(messages);
       setDeckName('');
       setFile(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
       onImported();
     } catch (err) {
-      setErrors([`Import fehlgeschlagen: ${(err as Error).message}`]);
+      setErrors([`${t.import.importFailedPrefix}${(err as Error).message}`]);
     } finally {
       setBusy(false);
     }
@@ -59,29 +70,32 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
   return (
     <section className="panel import-deck">
       <h2 className="panel-title">
-        Karten futtern <span className="starburst">CSV rein!</span>
+        {t.import.title} <span className="starburst">{t.import.badge}</span>
       </h2>
       <ul className="hint csv-rules">
         <li>
-          Genau <strong>2 Spalten</strong> pro Zeile: <code>Frage,Antwort</code>
+          {t.import.rule1Prefix}
+          <strong>{t.import.rule1Bold}</strong>
+          {t.import.rule1Suffix}
+          <code>{t.import.rule1Example}</code>
         </li>
-        <li>Kopfzeile optional (z. B. „Frage,Antwort“ oder „Front,Back“) — wird erkannt</li>
+        <li>{t.import.rule2}</li>
         <li>
-          Kommt ein Komma im Text vor? Dann Feld in Anführungszeichen setzen:{' '}
-          <code>"Paris, Frankreich",Hauptstadt</code>
+          {t.import.rule3Prefix}
+          <code>{t.import.rule3Example}</code>
         </li>
-        <li>Datei-Kodierung: UTF-8 (Standard bei Excel/Numbers/Sheets-Export)</li>
+        <li>{t.import.rule4}</li>
       </ul>
 
       <div className="import-form">
         <input
           type="text"
-          placeholder="Deck-Name (optional)"
+          placeholder={t.import.deckNamePlaceholder}
           value={deckName}
           onChange={(e) => setDeckName(e.target.value)}
         />
         <label className="file-button cbtn cbtn-cyan">
-          Datei waehlen
+          {t.import.chooseFile}
           <input
             ref={fileInputRef}
             type="file"
@@ -90,7 +104,7 @@ export function ImportDeck({ onImported }: ImportDeckProps) {
           />
         </label>
         <button className="cbtn cbtn-primary" onClick={handleImport} disabled={busy || !file}>
-          {busy ? 'Schnurrt…' : 'Los geht’s!'}
+          {busy ? t.import.submitBusy : t.import.submitIdle}
         </button>
       </div>
 

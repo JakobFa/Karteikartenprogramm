@@ -1,11 +1,17 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { exportBackup, importBackup } from '../backup';
-import { Cat, PHRASES, pick } from '../cats';
+import { Cat, pick } from '../cats';
+import { useLanguage } from '../LanguageContext';
 
 export function Backup() {
+  const { t, lang, phrases } = useLanguage();
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [phrase] = useState(() => pick(PHRASES.backup));
+  const [phrase, setPhrase] = useState(() => pick(phrases.backup));
+  useEffect(() => {
+    setPhrase(pick(phrases.backup));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleExport() {
@@ -23,9 +29,16 @@ export function Backup() {
     setStatus(null);
     try {
       const { decks, cards } = await importBackup(file);
-      setStatus(`🐾 ${decks} Deck(s) mit ${cards} Karte(n) zurueckgeholt!`);
+      setStatus(t.backup.restoredStatus(decks, cards));
     } catch (err) {
-      setStatus(`Autsch: ${(err as Error).message}`);
+      const message = (err as Error).message;
+      const translated =
+        message === 'INVALID_JSON'
+          ? t.backup.invalidJson
+          : message === 'INVALID_FORMAT'
+            ? t.backup.invalidFormat
+            : message;
+      setStatus(t.backup.errorStatus(translated));
     } finally {
       setBusy(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -35,18 +48,15 @@ export function Backup() {
   return (
     <section className="panel backup">
       <h2 className="panel-title">
-        Backup <span className="starburst">nicht vergessen!</span>
+        {t.backup.title} <span className="starburst">{t.backup.badge}</span>
       </h2>
-      <p className="hint">
-        Deine Karten leben nur in diesem Browser. Lad dir ab und zu ein Backup runter — oder
-        nimm es mit auf ein anderes Geraet.
-      </p>
+      <p className="hint">{t.backup.hint}</p>
       <div className="backup-actions">
         <button className="cbtn cbtn-cyan" onClick={handleExport} disabled={busy}>
-          Backup runterladen
+          {t.backup.downloadBtn}
         </button>
         <label className="file-button cbtn cbtn-pink">
-          Backup einspielen
+          {t.backup.importLabel}
           <input
             ref={fileInputRef}
             type="file"

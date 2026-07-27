@@ -1,12 +1,14 @@
 import type { Readiness } from '../readiness';
+import { useLanguage } from '../LanguageContext';
 
 interface ReadinessBarProps {
   readiness: Readiness;
-  /** Kompakte Variante ohne Legende, fuer die Deck-Liste. */
+  /** Kompakte Variante ohne Legende, für die Deck-Liste. */
   compact?: boolean;
 }
 
 export function ReadinessBar({ readiness, compact }: ReadinessBarProps) {
+  const { t } = useLanguage();
   const { percent, mature, learning, fresh, total } = readiness;
 
   return (
@@ -17,7 +19,7 @@ export function ReadinessBar({ readiness, compact }: ReadinessBarProps) {
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="Klausur-Reife"
+        aria-label={t.readiness.ariaLabel}
       >
         <div className="readiness-fill" style={{ width: `${percent}%` }} />
         <span className="readiness-percent">{percent}%</span>
@@ -25,15 +27,17 @@ export function ReadinessBar({ readiness, compact }: ReadinessBarProps) {
       {!compact && (
         <ul className="readiness-legend">
           <li>
-            <span className="dot dot-mature" /> {mature} sitzt
+            <span className="dot dot-mature" /> {mature} {t.readiness.mature}
           </li>
           <li>
-            <span className="dot dot-learning" /> {learning} am Lernen
+            <span className="dot dot-learning" /> {learning} {t.readiness.learning}
           </li>
           <li>
-            <span className="dot dot-fresh" /> {fresh} noch frisch
+            <span className="dot dot-fresh" /> {fresh} {t.readiness.fresh}
           </li>
-          <li className="legend-total">{total} gesamt</li>
+          <li className="legend-total">
+            {total} {t.readiness.total}
+          </li>
         </ul>
       )}
     </div>

@@ -7,7 +7,10 @@ export interface ParsedCard {
 
 export interface CsvParseResult {
   cards: ParsedCard[];
-  errors: string[];
+  /** 1-indexierte Zeilen, die wegen fehlender Spalten übersprungen wurden. */
+  skippedRows: number[];
+  /** Rohe Parser-Fehler (Papaparse-Meldungen bleiben englisch). */
+  parseErrors: { row: number | null; message: string }[];
 }
 
 const HEADER_KEYWORDS = new Set([
@@ -17,6 +20,10 @@ const HEADER_KEYWORDS = new Set([
   'back',
   'question',
   'answer',
+  'pregunta',
+  'respuesta',
+  'pergunta',
+  'resposta',
 ]);
 
 function looksLikeHeader(row: string[]): boolean {
@@ -28,24 +35,26 @@ export function parseCsv(fileContent: string): CsvParseResult {
     skipEmptyLines: true,
   });
 
-  const errors = result.errors.map(
-    (e) => `Zeile ${e.row != null ? e.row + 1 : '?'}: ${e.message}`,
-  );
+  const parseErrors = result.errors.map((e) => ({
+    row: e.row != null ? e.row + 1 : null,
+    message: e.message,
+  }));
 
   const rows = result.data;
   const startIndex = rows.length > 0 && looksLikeHeader(rows[0]) ? 1 : 0;
 
   const cards: ParsedCard[] = [];
+  const skippedRows: number[] = [];
   for (let i = startIndex; i < rows.length; i++) {
     const row = rows[i];
     const front = (row[0] ?? '').trim();
     const back = (row[1] ?? '').trim();
     if (!front || !back) {
-      errors.push(`Zeile ${i + 1}: erwarte zwei Spalten (Frage,Antwort), übersprungen`);
+      skippedRows.push(i + 1);
       continue;
     }
     cards.push({ front, back });
   }
 
-  return { cards, errors };
+  return { cards, skippedRows, parseErrors };
 }
