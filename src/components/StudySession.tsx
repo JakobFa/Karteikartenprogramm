@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { db, type Card } from '../db';
 import { byWeakness, reinsertAfterAgain, schedule, type Grade } from '../scheduler';
+import { buildCramQueue } from '../cram';
 import { Cat, pick, type CatName } from '../cats';
 import { useLanguage } from '../LanguageContext';
+
+export type StudyMode = 'review' | 'cram';
 
 interface StudySessionProps {
   deckId: number;
   deckName: string;
+  mode: StudyMode;
   onFinish: () => void;
 }
 
@@ -23,8 +27,9 @@ interface CatState {
   text: string;
 }
 
-export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) {
+export function StudySession({ deckId, deckName, mode, onFinish }: StudySessionProps) {
   const { t, lang, phrases } = useLanguage();
+  const isCram = mode === 'cram';
   const [queue, setQueue] = useState<Card[] | null>(null);
   const [flipped, setFlipped] = useState(false);
   const [reviewedCount, setReviewedCount] = useState(0);
@@ -33,8 +38,9 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     text: pick(phrases.front),
   }));
   const [sfx, setSfx] = useState<{ text: string; key: number } | null>(null);
-  const gradingRef = useRef(false);
   const [donePhrase, setDonePhrase] = useState(() => pick(phrases.done));
+  const gradingRef = useRef(false);
+
   useEffect(() => {
     setDonePhrase(pick(phrases.done));
     setCatState({ cat: 'think', text: pick(phrases.front) });
@@ -44,18 +50,20 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const now = Date.now();
-      const dueCards = await db.cards
-        .where('deckId')
-        .equals(deckId)
-        .filter((c) => c.dueDate <= now)
-        .toArray();
-      if (!cancelled) setQueue(byWeakness(dueCards));
+      const cards = await db.cards.where('deckId').equals(deckId).toArray();
+      if (cancelled) return;
+      if (isCram) {
+        // Endspurt ignoriert Faelligkeiten und geht nach Schwierigkeit.
+        setQueue(buildCramQueue(cards));
+      } else {
+        const now = Date.now();
+        setQueue(byWeakness(cards.filter((c) => c.dueDate <= now)));
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [deckId]);
+  }, [deckId, isCram]);
 
   if (queue === null) {
     return (
@@ -72,7 +80,13 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
           <h2 className="done-title">{t.study.doneTitle}</h2>
           <Cat name="sleepy" className="cat cat-lg cat-wiggle" />
           <p className="speech">{donePhrase}</p>
-          <p>{t.study.doneSummary(reviewedCount, deckName)}</p>
+          <p>
+            {isCram && reviewedCount === 0
+              ? t.study.cramEmpty
+              : isCram
+                ? t.study.cramDoneSummary(reviewedCount, deckName)
+                : t.study.doneSummary(reviewedCount, deckName)}
+          </p>
           <button className="cbtn cbtn-primary" onClick={onFinish}>
             {t.study.backToOverview}
           </button>
@@ -100,8 +114,10 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
 
     const graded = current;
     try {
-      const result = schedule(graded, grade);
-      await db.cards.update(graded.id, result);
+      // Im Endspurt wird bewusst nichts gespeichert: kurzfristiges Draufloslernen
+      // soll die aufgebauten SM-2-Intervalle nicht zerschiessen.
+      const result = isCram ? null : schedule(graded, grade);
+      if (result) await db.cards.update(graded.id, result);
 
       setReviewedCount((n) => n + 1);
       setCatState({ cat: GRADE_CAT[grade], text: pick(phrases[grade]) });
@@ -112,7 +128,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
         const rest = prev.slice(1);
         // "Nochmal" kommt schon nach ein paar Karten wieder dran, nicht erst am Sessionende.
         if (grade === 'again') {
-          return reinsertAfterAgain(rest, { ...graded, ...result });
+          return reinsertAfterAgain(rest, result ? { ...graded, ...result } : graded);
         }
         return rest;
       });
@@ -126,6 +142,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     <section className="panel study-session">
       <div className="study-header">
         <span className="study-deck-name">{deckName}</span>
+        {isCram && <span className="cram-badge">{t.study.cramBadge}</span>}
         <span className="study-remaining">{t.study.remaining(queue.length)}</span>
       </div>
 
@@ -155,6 +172,8 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
           </button>
         </div>
       )}
+
+      {isCram && <p className="cram-note">{t.study.cramNote}</p>}
 
       <div className="cat-row">
         <Cat name={catState.cat} className="cat cat-md cat-wiggle" />

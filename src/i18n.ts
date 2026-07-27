@@ -51,6 +51,8 @@ export interface Translations {
     counting: string;
     studyBtn: string;
     allDoneBtn: string;
+    cramBtn: string;
+    cramTitle: string;
     deleteBtn: string;
     deleteConfirm: (name: string) => string;
   };
@@ -58,6 +60,10 @@ export interface Translations {
     loading: string;
     doneTitle: string;
     doneSummary: (count: number, deck: string) => string;
+    cramDoneSummary: (count: number, deck: string) => string;
+    cramBadge: string;
+    cramNote: string;
+    cramEmpty: string;
     backToOverview: string;
     remaining: (count: number) => string;
     flipHint: string;
@@ -135,6 +141,8 @@ const de: Translations = {
     counting: 'zähle…',
     studyBtn: 'Lernen',
     allDoneBtn: 'Alles sitzt!',
+    cramBtn: '🔥 Endspurt',
+    cramTitle: 'Endspurt: schwere Karten üben, egal ob fällig (ändert deinen Lernplan nicht)',
     deleteBtn: 'Weg damit',
     deleteConfirm: (name) => `Deck "${name}" und alle Karten wirklich löschen?`,
   },
@@ -142,6 +150,11 @@ const de: Translations = {
     loading: 'Katze holt die Karten…',
     doneTitle: 'Geschafft!',
     doneSummary: (count, deck) => `Du hast ${count} Karte(n) aus „${deck}“ gelernt.`,
+    cramDoneSummary: (count, deck) =>
+      `Endspurt beendet: ${count} Karte(n) aus „${deck}“ geübt. Dein Lernplan bleibt unverändert.`,
+    cramBadge: '🔥 Endspurt',
+    cramNote: 'Übungsrunde — zählt nicht auf deinen Lernplan ein.',
+    cramEmpty: 'Dieses Deck hat noch keine Karten zum Üben.',
     backToOverview: 'Zurück zur Übersicht',
     remaining: (count) => `noch ${count}`,
     flipHint: '👆 Klick mich um',
@@ -204,6 +217,8 @@ const en: Translations = {
     counting: 'counting…',
     studyBtn: 'Study',
     allDoneBtn: 'All set!',
+    cramBtn: '🔥 Cram',
+    cramTitle: 'Cram: drill the hard cards regardless of due dates (leaves your schedule untouched)',
     deleteBtn: 'Toss it',
     deleteConfirm: (name) => `Really delete the deck "${name}" and all its cards?`,
   },
@@ -211,6 +226,11 @@ const en: Translations = {
     loading: 'Cat is fetching the cards…',
     doneTitle: 'All done!',
     doneSummary: (count, deck) => `You studied ${count} card(s) from "${deck}".`,
+    cramDoneSummary: (count, deck) =>
+      `Cram session over: ${count} card(s) from "${deck}" practised. Your schedule is unchanged.`,
+    cramBadge: '🔥 Cram',
+    cramNote: "Practice round — doesn't affect your schedule.",
+    cramEmpty: 'This deck has no cards to practise yet.',
     backToOverview: 'Back to overview',
     remaining: (count) => `${count} left`,
     flipHint: '👆 Tap me to flip',
@@ -273,6 +293,9 @@ const es: Translations = {
     counting: 'contando…',
     studyBtn: 'Estudiar',
     allDoneBtn: '¡Todo listo!',
+    cramBtn: '🔥 Repaso intensivo',
+    cramTitle:
+      'Repaso intensivo: practica las tarjetas difíciles sin importar la fecha (no altera tu plan)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `¿Seguro que quieres eliminar el mazo "${name}" y todas sus tarjetas?`,
   },
@@ -280,6 +303,11 @@ const es: Translations = {
     loading: 'El gato está buscando las tarjetas…',
     doneTitle: '¡Listo!',
     doneSummary: (count, deck) => `Estudiaste ${count} tarjeta(s) de "${deck}".`,
+    cramDoneSummary: (count, deck) =>
+      `Repaso intensivo terminado: practicaste ${count} tarjeta(s) de "${deck}". Tu plan no ha cambiado.`,
+    cramBadge: '🔥 Repaso intensivo',
+    cramNote: 'Ronda de práctica: no afecta a tu plan de estudio.',
+    cramEmpty: 'Este mazo todavía no tiene tarjetas para practicar.',
     backToOverview: 'Volver al resumen',
     remaining: (count) => `${count} restante(s)`,
     flipHint: '👆 Tócame para voltear',
@@ -342,6 +370,9 @@ const pt: Translations = {
     counting: 'a contar…',
     studyBtn: 'Estudar',
     allDoneBtn: 'Tudo em dia!',
+    cramBtn: '🔥 Revisão intensiva',
+    cramTitle:
+      'Revisão intensiva: treina os cartões difíceis independentemente da data (não altera o teu plano)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `Tens a certeza que queres eliminar o baralho "${name}" e todos os cartões?`,
   },
@@ -349,6 +380,11 @@ const pt: Translations = {
     loading: 'O gato está a buscar os cartões…',
     doneTitle: 'Feito!',
     doneSummary: (count, deck) => `Estudaste ${count} cartão(ões) de "${deck}".`,
+    cramDoneSummary: (count, deck) =>
+      `Revisão intensiva terminada: treinaste ${count} cartão(ões) de "${deck}". O teu plano não mudou.`,
+    cramBadge: '🔥 Revisão intensiva',
+    cramNote: 'Ronda de treino — não afeta o teu plano de estudo.',
+    cramEmpty: 'Este baralho ainda não tem cartões para treinar.',
     backToOverview: 'Voltar ao resumo',
     remaining: (count) => `${count} restante(s)`,
     flipHint: '👆 Toca-me para virar',

@@ -5,13 +5,13 @@ import { Cat, pick } from './cats';
 import { useLanguage } from './LanguageContext';
 import { ImportDeck } from './components/ImportDeck';
 import { DeckList } from './components/DeckList';
-import { StudySession } from './components/StudySession';
+import { StudySession, type StudyMode } from './components/StudySession';
 import { Backup } from './components/Backup';
 import { ExamProgress } from './components/ExamProgress';
 import { LanguageSwitcher } from './components/LanguageSwitcher';
 import './App.css';
 
-type View = { name: 'overview' } | { name: 'study'; deckId: number };
+type View = { name: 'overview' } | { name: 'study'; deckId: number; mode: StudyMode };
 
 function App() {
   const [view, setView] = useState<View>({ name: 'overview' });
@@ -55,7 +55,10 @@ function App() {
 
           <ExamProgress />
           <ImportDeck onImported={() => setView({ name: 'overview' })} />
-          <DeckList onStudy={(deckId) => setView({ name: 'study', deckId })} />
+          <DeckList
+            onStudy={(deckId) => setView({ name: 'study', deckId, mode: 'review' })}
+            onCram={(deckId) => setView({ name: 'study', deckId, mode: 'cram' })}
+          />
           <Backup />
         </main>
       )}
@@ -63,8 +66,10 @@ function App() {
       {view.name === 'study' && studyingDeck && (
         <main>
           <StudySession
+            key={`${view.deckId}-${view.mode}`}
             deckId={view.deckId}
             deckName={studyingDeck.name}
+            mode={view.mode}
             onFinish={() => setView({ name: 'overview' })}
           />
         </main>

@@ -8,6 +8,7 @@ import { ReadinessBar } from './ReadinessBar';
 
 interface DeckListProps {
   onStudy: (deckId: number) => void;
+  onCram: (deckId: number) => void;
 }
 
 interface DeckStats {
@@ -15,7 +16,7 @@ interface DeckStats {
   readiness: Readiness;
 }
 
-export function DeckList({ onStudy }: DeckListProps) {
+export function DeckList({ onStudy, onCram }: DeckListProps) {
   const { t, lang, phrases } = useLanguage();
   // Einmal gewuerfelt und dann stabil, sonst wechselt der Spruch bei jedem Render;
   // bei Sprachwechsel aber neu wuerfeln, damit der Text zur Sprache passt.
@@ -107,6 +108,14 @@ export function DeckList({ onStudy }: DeckListProps) {
                   disabled={!stat || stat.due === 0}
                 >
                   {stat && stat.due === 0 ? t.deckList.allDoneBtn : t.deckList.studyBtn}
+                </button>
+                <button
+                  className="cbtn cbtn-cram"
+                  onClick={() => onCram(deck.id)}
+                  title={t.deckList.cramTitle}
+                  disabled={!stat || stat.readiness.total === 0}
+                >
+                  {t.deckList.cramBtn}
                 </button>
                 <button className="cbtn cbtn-red" onClick={() => handleDelete(deck.id, deck.name)}>
                   {t.deckList.deleteBtn}
