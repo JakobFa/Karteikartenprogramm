@@ -21,9 +21,18 @@ const MATURE_INTERVAL_DAYS = 21;
 export type CramTier = 'hard' | 'medium' | 'easy';
 
 export function cramTier(card: Card): CramTier {
-  // Nie (oder kaum) bewertete Karten zaehlen als schwer — wir wissen es nicht besser.
-  if (card.repetitions <= 1 || card.easeFactor < HARD_EASE) return 'hard';
-  if (card.easeFactor < EASY_EASE || card.interval < MATURE_INTERVAL_DAYS) return 'medium';
+  // "Schwer" heisst: du hast bei dieser Karte nachweislich gehakt, also mit
+  // "Nochmal"/"Schwer" bewertet und damit den Ease-Faktor gedrueckt. Nur diese
+  // Karten werden im Endspurt wiederholt — wuerden wir hier auch noch alle
+  // wenig geuebten Karten mitzaehlen, waere nach dem ersten Durchgang jede
+  // Karte "schwer" und die Runde doppelt so lang wie das Deck.
+  if (card.easeFactor < HARD_EASE) return 'hard';
+  if (
+    card.repetitions === 0 ||
+    card.easeFactor < EASY_EASE ||
+    card.interval < MATURE_INTERVAL_DAYS
+  )
+    return 'medium';
   return 'easy';
 }
 
