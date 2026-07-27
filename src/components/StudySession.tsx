@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { db, type Card } from '../db';
 import { byWeakness, reinsertAfterAgain, schedule, type Grade } from '../scheduler';
 import { Cat, pick, type CatName } from '../cats';
@@ -33,6 +33,7 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
     text: pick(phrases.front),
   }));
   const [sfx, setSfx] = useState<{ text: string; key: number } | null>(null);
+  const gradingRef = useRef(false);
   const [donePhrase, setDonePhrase] = useState(() => pick(phrases.done));
   useEffect(() => {
     setDonePhrase(pick(phrases.done));
@@ -91,23 +92,34 @@ export function StudySession({ deckId, deckName, onFinish }: StudySessionProps) 
   }
 
   async function handleGrade(grade: Grade) {
-    const result = schedule(current, grade);
-    await db.cards.update(current.id, result);
-    setReviewedCount((n) => n + 1);
+    // Ohne diese Sperre kann ein schneller Doppelklick handleGrade zweimal mit
+    // derselben Karte ausloesen: beide Durchlaeufe kuerzen die Warteschlange,
+    // aber nur eine Karte wird bewertet — die uebersprungene bliebe faellig.
+    if (gradingRef.current) return;
+    gradingRef.current = true;
 
-    setCatState({ cat: GRADE_CAT[grade], text: pick(phrases[grade]) });
-    setSfx({ text: t.study.sfx[grade], key: Date.now() });
+    const graded = current;
+    try {
+      const result = schedule(graded, grade);
+      await db.cards.update(graded.id, result);
 
-    setQueue((prev) => {
-      if (!prev) return prev;
-      const rest = prev.slice(1);
-      // "Nochmal" kommt schon nach ein paar Karten wieder dran, nicht erst am Sessionende.
-      if (grade === 'again') {
-        return reinsertAfterAgain(rest, { ...current, ...result });
-      }
-      return rest;
-    });
-    setFlipped(false);
+      setReviewedCount((n) => n + 1);
+      setCatState({ cat: GRADE_CAT[grade], text: pick(phrases[grade]) });
+      setSfx({ text: t.study.sfx[grade], key: Date.now() });
+
+      setQueue((prev) => {
+        if (!prev) return prev;
+        const rest = prev.slice(1);
+        // "Nochmal" kommt schon nach ein paar Karten wieder dran, nicht erst am Sessionende.
+        if (grade === 'again') {
+          return reinsertAfterAgain(rest, { ...graded, ...result });
+        }
+        return rest;
+      });
+      setFlipped(false);
+    } finally {
+      gradingRef.current = false;
+    }
   }
 
   return (
