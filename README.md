@@ -19,9 +19,9 @@ und keine Datenbank im Hintergrund.
 - Backup-Export/-Import als JSON
 - Mehrsprachige Oberfläche: Deutsch, English, Español, Português (Umschalter im Hauptmenü)
 - **Endspurt-Modus** für kurzfristiges Klausurlernen: geht unabhängig von
-  Fälligkeiten einmal durch *alle* Karten, schwere kommen zusätzlich ein zweites
-  Mal mit Abstand dran (Spacing-Effekt) — und lässt den SM-2-Lernplan dabei
-  bewusst unangetastet
+  Fälligkeiten einmal durch *alle* Karten des Decks, in zufälliger Reihenfolge.
+  Was man mit „Nochmal“ bewertet, kommt in derselben Runde zurück. Der
+  SM-2-Lernplan bleibt dabei bewusst unangetastet
 
 ## Entwicklung
 

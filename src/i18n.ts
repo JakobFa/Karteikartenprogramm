@@ -143,7 +143,7 @@ const de: Translations = {
     allDoneBtn: 'Alles sitzt!',
     cramBtn: '🔥 Endspurt',
     cramTitle:
-      'Endspurt: alle Karten durchgehen, egal ob fällig — schwere kommen doppelt dran (ändert deinen Lernplan nicht)',
+      'Endspurt: alle Karten in zufälliger Reihenfolge durchgehen, egal ob fällig — was du nicht wusstest, kommt nochmal (ändert deinen Lernplan nicht)',
     deleteBtn: 'Weg damit',
     deleteConfirm: (name) => `Deck "${name}" und alle Karten wirklich löschen?`,
   },
@@ -220,7 +220,7 @@ const en: Translations = {
     allDoneBtn: 'All set!',
     cramBtn: '🔥 Cram',
     cramTitle:
-      'Cram: run through every card regardless of due dates — hard ones come up twice (leaves your schedule untouched)',
+      "Cram: run through every card in random order regardless of due dates — whatever you didn't know comes back (leaves your schedule untouched)",
     deleteBtn: 'Toss it',
     deleteConfirm: (name) => `Really delete the deck "${name}" and all its cards?`,
   },
@@ -297,7 +297,7 @@ const es: Translations = {
     allDoneBtn: '¡Todo listo!',
     cramBtn: '🔥 Repaso intensivo',
     cramTitle:
-      'Repaso intensivo: repasa todas las tarjetas sin importar la fecha; las difíciles salen dos veces (no altera tu plan)',
+      'Repaso intensivo: repasa todas las tarjetas en orden aleatorio sin importar la fecha; lo que no supiste vuelve a salir (no altera tu plan)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `¿Seguro que quieres eliminar el mazo "${name}" y todas sus tarjetas?`,
   },
@@ -374,7 +374,7 @@ const pt: Translations = {
     allDoneBtn: 'Tudo em dia!',
     cramBtn: '🔥 Revisão intensiva',
     cramTitle:
-      'Revisão intensiva: passa por todos os cartões independentemente da data; os difíceis aparecem duas vezes (não altera o teu plano)',
+      'Revisão intensiva: passa por todos os cartões em ordem aleatória independentemente da data; o que não soubeste volta a aparecer (não altera o teu plano)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `Tens a certeza que queres eliminar o baralho "${name}" e todos os cartões?`,
   },

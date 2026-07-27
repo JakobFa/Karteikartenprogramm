@@ -1,68 +1,29 @@
 import type { Card } from './db';
-import { byWeakness } from './scheduler';
 
 /**
  * Endspurt-Modus fuer kurzfristiges Klausurlernen.
  *
  * SM-2 blendet gut sitzende Karten tagelang aus — sinnvoll fuers Langzeit-
- * gedaechtnis, aber blockierend, wenn die Klausur uebermorgen ist. Vor einer
- * Klausur will man einmal *alles* gesehen haben, deshalb nimmt der Endspurt
- * jede Karte des Decks mit — schwere zuerst und ein zweites Mal, leichte
- * einmal am Ende.
+ * gedaechtnis, aber blockierend, wenn die Klausur uebermorgen ist. Der Endspurt
+ * geht deshalb einmal durch *alle* Karten des Decks, in zufaelliger Reihenfolge.
+ *
+ * Wiederholt wird nur, was man in dieser Runde tatsaechlich nicht wusste: eine
+ * mit "Nochmal" bewertete Karte wandert zurueck in die Warteschlange (siehe
+ * reinsertAfterAgain im scheduler). Vorab verdoppeln waere Rateraterei und
+ * wuerde die Runde unnoetig aufblaehen.
  */
 
-/** Unter diesem Ease-Faktor gilt eine Karte als schwer (oft "Nochmal"/"Schwer"). */
-const HARD_EASE = 2.2;
-/** Ab diesem Ease-Faktor gilt eine Karte als leicht. */
-const EASY_EASE = 2.6;
-/** Ab diesem Intervall (Tage) gilt eine Karte als sicher gelernt. */
-const MATURE_INTERVAL_DAYS = 21;
-
-export type CramTier = 'hard' | 'medium' | 'easy';
-
-export function cramTier(card: Card): CramTier {
-  // "Schwer" heisst: du hast bei dieser Karte nachweislich gehakt, also mit
-  // "Nochmal"/"Schwer" bewertet und damit den Ease-Faktor gedrueckt. Nur diese
-  // Karten werden im Endspurt wiederholt — wuerden wir hier auch noch alle
-  // wenig geuebten Karten mitzaehlen, waere nach dem ersten Durchgang jede
-  // Karte "schwer" und die Runde doppelt so lang wie das Deck.
-  if (card.easeFactor < HARD_EASE) return 'hard';
-  if (
-    card.repetitions === 0 ||
-    card.easeFactor < EASY_EASE ||
-    card.interval < MATURE_INTERVAL_DAYS
-  )
-    return 'medium';
-  return 'easy';
+/** Fisher-Yates: gleichverteiltes Mischen ohne die Sortier-Trick-Fallstricke. */
+export function shuffle<T>(items: T[], random: () => number = Math.random): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
 
-/**
- * Stellt die Endspurt-Warteschlange zusammen: jede Karte mindestens einmal,
- * schwere Karten zusaetzlich ein zweites Mal. Die Wiederholungen liegen
- * bewusst weit hinten, damit zwischen erster und zweiter Abfrage andere Karten
- * liegen (Spacing-Effekt statt stumpfem Doppel-Anzeigen).
- */
-export function buildCramQueue(cards: Card[]): Card[] {
-  if (cards.length === 0) return [];
-
-  const base = byWeakness(cards); // schwerste zuerst
-  const repeats = base.filter((c) => cramTier(c) === 'hard');
-  if (repeats.length === 0) return base;
-
-  // Wiederholungen erst ab der zweiten Haelfte einstreuen.
-  const half = Math.max(1, Math.floor(base.length / 2));
-  const gap = Math.max(1, Math.floor((base.length - half) / repeats.length));
-
-  const queue: Card[] = [];
-  const pending = [...repeats];
-  base.forEach((card, i) => {
-    queue.push(card);
-    if (i >= half && pending.length > 0 && (i - half) % gap === 0) {
-      queue.push(pending.shift()!);
-    }
-  });
-  // Was nicht mehr reingepasst hat, kommt ans Ende.
-  queue.push(...pending);
-
-  return queue;
+/** Alle Karten des Decks, zufaellig gemischt. */
+export function buildCramQueue(cards: Card[], random: () => number = Math.random): Card[] {
+  return shuffle(cards, random);
 }
