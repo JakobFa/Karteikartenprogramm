@@ -18,9 +18,10 @@ und keine Datenbank im Hintergrund.
 - Comic-Katzen als Inline-SVG mit kontextabhängigen Mutmach-Sprüchen
 - Backup-Export/-Import als JSON
 - Mehrsprachige Oberfläche: Deutsch, English, Español, Português (Umschalter im Hauptmenü)
-- **Endspurt-Modus** für kurzfristiges Klausurlernen: übt schwere Karten unabhängig
-  von Fälligkeiten (leichte bleiben draußen, mittlere werden eingestreut) und lässt
-  den SM-2-Lernplan dabei bewusst unangetastet
+- **Endspurt-Modus** für kurzfristiges Klausurlernen: geht unabhängig von
+  Fälligkeiten einmal durch *alle* Karten, schwere kommen zusätzlich ein zweites
+  Mal mit Abstand dran (Spacing-Effekt) — und lässt den SM-2-Lernplan dabei
+  bewusst unangetastet
 
 ## Entwicklung
 

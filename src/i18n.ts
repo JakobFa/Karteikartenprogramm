@@ -142,7 +142,8 @@ const de: Translations = {
     studyBtn: 'Lernen',
     allDoneBtn: 'Alles sitzt!',
     cramBtn: '🔥 Endspurt',
-    cramTitle: 'Endspurt: schwere Karten üben, egal ob fällig (ändert deinen Lernplan nicht)',
+    cramTitle:
+      'Endspurt: alle Karten durchgehen, egal ob fällig — schwere kommen doppelt dran (ändert deinen Lernplan nicht)',
     deleteBtn: 'Weg damit',
     deleteConfirm: (name) => `Deck "${name}" und alle Karten wirklich löschen?`,
   },
@@ -218,7 +219,8 @@ const en: Translations = {
     studyBtn: 'Study',
     allDoneBtn: 'All set!',
     cramBtn: '🔥 Cram',
-    cramTitle: 'Cram: drill the hard cards regardless of due dates (leaves your schedule untouched)',
+    cramTitle:
+      'Cram: run through every card regardless of due dates — hard ones come up twice (leaves your schedule untouched)',
     deleteBtn: 'Toss it',
     deleteConfirm: (name) => `Really delete the deck "${name}" and all its cards?`,
   },
@@ -295,7 +297,7 @@ const es: Translations = {
     allDoneBtn: '¡Todo listo!',
     cramBtn: '🔥 Repaso intensivo',
     cramTitle:
-      'Repaso intensivo: practica las tarjetas difíciles sin importar la fecha (no altera tu plan)',
+      'Repaso intensivo: repasa todas las tarjetas sin importar la fecha; las difíciles salen dos veces (no altera tu plan)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `¿Seguro que quieres eliminar el mazo "${name}" y todas sus tarjetas?`,
   },
@@ -372,7 +374,7 @@ const pt: Translations = {
     allDoneBtn: 'Tudo em dia!',
     cramBtn: '🔥 Revisão intensiva',
     cramTitle:
-      'Revisão intensiva: treina os cartões difíceis independentemente da data (não altera o teu plano)',
+      'Revisão intensiva: passa por todos os cartões independentemente da data; os difíceis aparecem duas vezes (não altera o teu plano)',
     deleteBtn: 'Eliminar',
     deleteConfirm: (name) => `Tens a certeza que queres eliminar o baralho "${name}" e todos os cartões?`,
   },
